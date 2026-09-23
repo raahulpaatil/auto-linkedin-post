@@ -40,6 +40,7 @@ def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> di
         "status": "New",
         "reason": None,
         "confidential_flag": False,
+        "confidential_reason": None,
         "source_id": source_id,
         "note_type": note_type,
         "draft": None,
@@ -66,12 +67,13 @@ def set_status(note_id: str, status: str, reason: str | None = None) -> dict:
     return entry
 
 
-def set_confidential_flag(note_id: str, flagged: bool) -> dict:
+def set_confidential_flag(note_id: str, flagged: bool, reason: str | None = None) -> dict:
     tracker = load_tracker()
     if note_id not in tracker["notes"]:
         raise KeyError(f"No tracker entry for note {note_id!r}")
     entry = tracker["notes"][note_id]
     entry["confidential_flag"] = flagged
+    entry["confidential_reason"] = reason
     entry["updated_at"] = _now()
     save_tracker(tracker)
     return entry
