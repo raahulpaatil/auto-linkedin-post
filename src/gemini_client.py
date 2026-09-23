@@ -54,10 +54,21 @@ def generate(
     return response.text
 
 
-def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/ogg") -> str:
-    """Transcribes a voice note's audio bytes to text via Gemini.
+TRANSCRIBE_INSTRUCTION = (
+    "Transcribe this audio exactly as spoken, in the language it was spoken "
+    "in. Output plain text only — no timestamps, no speaker labels, no "
+    "commentary, no formatting."
+)
 
-    Not yet wired — pending real Telegram audio download (phase 4).
-    """
-    _get_client()
-    raise NotImplementedError("Real audio transcription lands in phase 4.")
+
+def transcribe_audio(audio_bytes: bytes, mime_type: str = "audio/ogg") -> str:
+    """Transcribes a voice note's audio bytes to plain text via Gemini."""
+    client = _get_client()
+    response = client.models.generate_content(
+        model=DEFAULT_MODEL,
+        contents=[
+            TRANSCRIBE_INSTRUCTION,
+            types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
+        ],
+    )
+    return response.text.strip()

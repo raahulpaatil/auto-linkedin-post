@@ -44,6 +44,7 @@ def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> di
         "source_id": source_id,
         "note_type": note_type,
         "draft": None,
+        "delivered": False,
         "created_at": timestamp,
         "updated_at": timestamp,
     }
@@ -86,6 +87,17 @@ def set_draft(note_id: str, draft_text: str) -> dict:
     entry = tracker["notes"][note_id]
     entry["draft"] = draft_text
     entry["status"] = "Draft ready"
+    entry["updated_at"] = _now()
+    save_tracker(tracker)
+    return entry
+
+
+def set_delivered(note_id: str) -> dict:
+    tracker = load_tracker()
+    if note_id not in tracker["notes"]:
+        raise KeyError(f"No tracker entry for note {note_id!r}")
+    entry = tracker["notes"][note_id]
+    entry["delivered"] = True
     entry["updated_at"] = _now()
     save_tracker(tracker)
     return entry

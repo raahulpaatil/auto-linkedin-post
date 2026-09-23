@@ -1,13 +1,16 @@
 """Orchestrates the pipeline: ingest -> screen -> draft -> deliver.
 
-Ingest, screen, and draft are wired to real logic (screen and draft call the
-live Gemini API). deliver is wired in as phase 4 lands, guarded by
-NotImplementedError so it's obvious what's real and what isn't.
+All four stages are wired to real logic. Ingest/deliver go through
+telegram_client.get_client(), which returns the mock or real client based on
+PIPELINE_MODE; screen/draft always call the live Gemini API.
 """
+
+import os
 
 from dotenv import load_dotenv
 
 from src import tracker
+from src.deliver import run_delivery
 from src.draft import run_drafting
 from src.ingest import run_ingestion
 from src.screen import run_screening
@@ -36,9 +39,22 @@ def main() -> None:
     for note_id, draft in drafted:
         print(f"--- {note_id} ---\n{draft}\n")
 
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+    if chat_id and not chat_id.startswith("REPLACE_ME"):
+        delivered = run_delivery(client, chat_id)
+        print(f"Delivered {len(delivered)} draft(s) via Telegram: {delivered}\n")
+    else:
+        print("TELEGRAM_CHAT_ID not set — skipping delivery.\n")
+
     print("Tracker state (data/tracker.json):")
     for note_id, entry in tracker.load_tracker()["notes"].items():
-        print(f"  {note_id}: {entry['status']}" + (" [CONFIDENTIAL]" if entry["confidential_flag"] else ""))
+        flags = []
+        if entry["confidential_flag"]:
+            flags.append("CONFIDENTIAL")
+        if entry["delivered"]:
+            flags.append("DELIVERED")
+        suffix = f" [{', '.join(flags)}]" if flags else ""
+        print(f"  {note_id}: {entry['status']}{suffix}")
 
 
 if __name__ == "__main__":

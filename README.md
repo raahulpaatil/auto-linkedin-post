@@ -19,17 +19,19 @@ posting.
 
 ## Pipeline stages
 
-| Stage    | File               | Status                                      |
-|----------|--------------------|----------------------------------------------|
-| Ingest   | `src/ingest.py`    | Working, in mock mode (real Telegram pending) |
-| Screen   | `src/screen.py`    | Working, live Gemini calls                    |
-| Draft    | `src/draft.py`     | Working, live Gemini calls                    |
-| Deliver  | `src/deliver.py`   | Not built yet (phase 4)                       |
+| Stage    | File               | Status                          |
+|----------|--------------------|----------------------------------|
+| Ingest   | `src/ingest.py`    | Working — mock or live Telegram  |
+| Screen   | `src/screen.py`    | Working, live Gemini calls       |
+| Draft    | `src/draft.py`     | Working, live Gemini calls       |
+| Deliver  | `src/deliver.py`   | Working — mock or live Telegram  |
 
 `data/tracker.json` holds the status of every note (`New` / `Developing` /
-`Parked` / `Discarded` / `Draft ready`), plus its confidentiality flag and,
-once drafted, its draft text. `data/notes/` holds one JSON file per raw note.
-Both are plain files meant to be committed to git — no database.
+`Parked` / `Discarded` / `Draft ready`), plus its confidentiality flag,
+delivery flag, and, once drafted, its draft text. `data/notes/` holds one
+JSON file per raw note. Both are plain files meant to be committed to git —
+no database. `data/telegram_offset.json` (gitignored, machine-local) tracks
+which real Telegram updates have already been ingested.
 
 ## Setup
 
@@ -40,11 +42,19 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-`.env` starts in `PIPELINE_MODE=mock` for Telegram, which needs no real
-credentials for ingest/deliver — it reads fake incoming messages from
-`tests/sample_messages.json` and prints outgoing messages to the terminal
-instead of calling Telegram. Screening always calls the real Gemini API, so
-`GEMINI_API_KEY` in `.env` must be a real key.
+Fill in `.env` with your real `TELEGRAM_BOT_TOKEN`, `GEMINI_API_KEY`, and
+`TELEGRAM_CHAT_ID` (the channel/chat the bot delivers drafts to — the bot
+must already be an admin of that channel to post into it and to receive its
+posts).
+
+`PIPELINE_MODE` controls both ingest and deliver together:
+- `mock` — ingest reads fake messages from `tests/sample_messages.json`;
+  deliver prints to the terminal instead of calling Telegram. No real
+  credentials needed for these two stages. Screening and drafting always
+  call the real Gemini API regardless of this setting.
+- `live` — ingest polls the real Telegram channel for new messages (text and
+  voice, transcribed via Gemini); deliver sends real messages to
+  `TELEGRAM_CHAT_ID`.
 
 ## Running the pipeline
 
@@ -52,23 +62,28 @@ instead of calling Telegram. Screening always calls the real Gemini API, so
 python3 main.py
 ```
 
-This ingests the sample messages, writes one JSON file per note into
-`data/notes/`, screens each new note with Gemini (Develop/Park/Discard, one-
-line reason, confidentiality flag), drafts a full LinkedIn post for every
-"Develop" note using `voice/meera_voice_skill.md` as the system prompt, and
-updates `data/tracker.json` accordingly. Re-running it is safe — re-ingesting
-the same `message_id` just rewrites the same note file, and only notes still
-in status `New`/`Developing` get (re-)screened/(re-)drafted.
+Runs ingest → screen → draft → deliver once, end to end, and prints a
+tracker summary. Re-running is safe: ingest won't re-fetch what it's already
+seen (same `message_id` in mock mode, or the persisted Telegram offset in
+live mode), screen/draft only touch notes still in `New`/`Developing`, and
+deliver only sends drafts not yet marked `delivered`.
 
-Confidentiality-flagged notes are still drafted (the flag is there so Meera
-reviews them with that context — rule 1's manual-review gate is what actually
-keeps anything from reaching LinkedIn unreviewed), not silently skipped.
+Confidentiality-flagged notes are still drafted and delivered (the flag is
+there so Meera reviews them with that context — rule 1's manual-review gate
+is what actually keeps anything from reaching LinkedIn unreviewed), not
+silently skipped.
 
 ## What's still pending
 
-- `voice/meera_voice_skill.md` — provided.
-- `TELEGRAM_BOT_TOKEN` — provided, verified against `getMe`; live polling/
-  delivery still lands in phase 4.
-- `GEMINI_API_KEY` — provided, verified and in use for screening and
-  drafting (phases 2–3).
+- `voice/meera_voice_skill.md` — provided, in use.
+- `TELEGRAM_BOT_TOKEN` — provided, verified; live ingest and delivery both
+  working (bot is admin of the target channel).
+- `GEMINI_API_KEY` — provided, verified; in use for screening, drafting, and
+  voice transcription.
+- `TELEGRAM_CHAT_ID` — provided, verified via `getChat`/`getChatMember`.
 - GitHub repo — done: [raahulpaatil/auto-linkedin-post](https://github.com/raahulpaatil/auto-linkedin-post) (private).
+
+All four non-negotiables and all four pipeline stages are now live. What's
+left is day-to-day use: running `main.py` whenever Meera wants her latest
+notes processed (manually, or later on a schedule if she wants that
+automated).
