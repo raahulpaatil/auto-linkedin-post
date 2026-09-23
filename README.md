@@ -19,12 +19,12 @@ posting.
 
 ## Pipeline stages
 
-| Stage    | File               | Status                                    |
-|----------|--------------------|--------------------------------------------|
-| Ingest   | `src/ingest.py`    | Working, in mock mode                      |
-| Screen   | `src/screen.py`    | Not built yet (phase 2)                    |
-| Draft    | `src/draft.py`     | Not built yet (phase 3)                    |
-| Deliver  | `src/deliver.py`   | Not built yet (phase 4)                    |
+| Stage    | File               | Status                                      |
+|----------|--------------------|----------------------------------------------|
+| Ingest   | `src/ingest.py`    | Working, in mock mode (real Telegram pending) |
+| Screen   | `src/screen.py`    | Working, live Gemini calls                    |
+| Draft    | `src/draft.py`     | Not built yet (phase 3)                       |
+| Deliver  | `src/deliver.py`   | Not built yet (phase 4)                       |
 
 `data/tracker.json` holds the status of every note (`New` / `Developing` /
 `Parked` / `Discarded` / `Draft ready`), plus its confidentiality flag and,
@@ -40,26 +40,30 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-`.env` starts in `PIPELINE_MODE=mock`, which needs no real credentials — it
-reads fake incoming messages from `tests/sample_messages.json` and prints
-outgoing messages to the terminal instead of calling Telegram.
+`.env` starts in `PIPELINE_MODE=mock` for Telegram, which needs no real
+credentials for ingest/deliver — it reads fake incoming messages from
+`tests/sample_messages.json` and prints outgoing messages to the terminal
+instead of calling Telegram. Screening always calls the real Gemini API, so
+`GEMINI_API_KEY` in `.env` must be a real key.
 
-## Running the phase 1 dry run
+## Running the pipeline
 
 ```bash
 python3 main.py
 ```
 
 This ingests the sample messages, writes one JSON file per note into
-`data/notes/`, registers each in `data/tracker.json` with status `New`, and
-prints the resulting tracker state. Re-running it is safe — re-ingesting the
-same `message_id` just rewrites the same note file and leaves its tracker
-entry as-is.
+`data/notes/`, screens each new note with Gemini (Develop/Park/Discard, one-
+line reason, confidentiality flag), and updates `data/tracker.json`
+accordingly. Re-running it is safe — re-ingesting the same `message_id` just
+rewrites the same note file, and only notes still in status `New` get
+(re-)screened.
 
 ## What's still pending
 
 - `voice/meera_voice_skill.md` — provided.
-- `TELEGRAM_BOT_TOKEN` — pending, needed for phase 4 (live delivery).
-- `GEMINI_API_KEY` — pending, needed for phase 2 (screening) and phase 3
-  (drafting).
-- GitHub repo name, visibility, and structure — to be confirmed before phase 5.
+- `TELEGRAM_BOT_TOKEN` — provided, verified against `getMe`; live polling/
+  delivery still lands in phase 4.
+- `GEMINI_API_KEY` — provided, verified and in use for screening (phase 2).
+  Drafting (phase 3) will reuse it.
+- GitHub repo — done: [raahulpaatil/auto-linkedin-post](https://github.com/raahulpaatil/auto-linkedin-post) (private).
