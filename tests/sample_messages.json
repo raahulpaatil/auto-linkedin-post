@@ -1,0 +1,27 @@
+[
+  {
+    "message_id": 101,
+    "date": "2026-09-20T08:15:00Z",
+    "type": "text",
+    "text": "customer asked why our moisturiser jar doesn't say anything about how long it's good for after opening - PAO symbol thing, most brands don't even put the right number on it"
+  },
+  {
+    "message_id": 102,
+    "date": "2026-09-21T14:02:00Z",
+    "type": "voice",
+    "voice_file_id": "AwADBAADbXXXXXX",
+    "transcript_placeholder": "batch 47 failed stability test again, third time this quarter, need to figure out why the emulsion is splitting at 40C, supplier gave us a new surfactant lot and I think that's the variable"
+  },
+  {
+    "message_id": 103,
+    "date": "2026-09-22T19:45:00Z",
+    "type": "text",
+    "text": "reminder to self: don't forget dentist appointment thursday"
+  },
+  {
+    "message_id": 104,
+    "date": "2026-09-23T09:30:00Z",
+    "type": "text",
+    "text": "a customer emailed her full address and said she'd had a reaction to the vitamin C serum on her cheeks, need to reply and figure out the batch number for her order"
+  }
+]
