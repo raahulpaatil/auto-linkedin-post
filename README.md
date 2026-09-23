@@ -23,7 +23,7 @@ posting.
 |----------|--------------------|----------------------------------------------|
 | Ingest   | `src/ingest.py`    | Working, in mock mode (real Telegram pending) |
 | Screen   | `src/screen.py`    | Working, live Gemini calls                    |
-| Draft    | `src/draft.py`     | Not built yet (phase 3)                       |
+| Draft    | `src/draft.py`     | Working, live Gemini calls                    |
 | Deliver  | `src/deliver.py`   | Not built yet (phase 4)                       |
 
 `data/tracker.json` holds the status of every note (`New` / `Developing` /
@@ -54,16 +54,21 @@ python3 main.py
 
 This ingests the sample messages, writes one JSON file per note into
 `data/notes/`, screens each new note with Gemini (Develop/Park/Discard, one-
-line reason, confidentiality flag), and updates `data/tracker.json`
-accordingly. Re-running it is safe — re-ingesting the same `message_id` just
-rewrites the same note file, and only notes still in status `New` get
-(re-)screened.
+line reason, confidentiality flag), drafts a full LinkedIn post for every
+"Develop" note using `voice/meera_voice_skill.md` as the system prompt, and
+updates `data/tracker.json` accordingly. Re-running it is safe — re-ingesting
+the same `message_id` just rewrites the same note file, and only notes still
+in status `New`/`Developing` get (re-)screened/(re-)drafted.
+
+Confidentiality-flagged notes are still drafted (the flag is there so Meera
+reviews them with that context — rule 1's manual-review gate is what actually
+keeps anything from reaching LinkedIn unreviewed), not silently skipped.
 
 ## What's still pending
 
 - `voice/meera_voice_skill.md` — provided.
 - `TELEGRAM_BOT_TOKEN` — provided, verified against `getMe`; live polling/
   delivery still lands in phase 4.
-- `GEMINI_API_KEY` — provided, verified and in use for screening (phase 2).
-  Drafting (phase 3) will reuse it.
+- `GEMINI_API_KEY` — provided, verified and in use for screening and
+  drafting (phases 2–3).
 - GitHub repo — done: [raahulpaatil/auto-linkedin-post](https://github.com/raahulpaatil/auto-linkedin-post) (private).
