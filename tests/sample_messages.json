@@ -23,5 +23,17 @@
     "date": "2026-09-23T09:30:00Z",
     "type": "text",
     "text": "a customer emailed her full address and said she'd had a reaction to the vitamin C serum on her cheeks, need to reply and figure out the batch number for her order"
+  },
+  {
+    "message_id": 105,
+    "date": "2026-09-23T11:00:00Z",
+    "type": "text",
+    "text": "keep seeing customers apply vitamin C serum right after retinol at night with no gap between them, no buffer time - pretty sure that breaks down the actives faster and irritates skin, want to explain why layering order and wait time actually matters, we don't have a study on this just what I've seen in customer complaints"
+  },
+  {
+    "message_id": 106,
+    "date": "2026-09-23T15:20:00Z",
+    "type": "text",
+    "text": "found the reference I wanted - IIT Bombay 2024 study found 62% of sunscreens sold in tier-2 Indian cities tested below their labelled SPF value, want to write about why SPF testing gaps happen and what to check on a label"
   }
 ]
