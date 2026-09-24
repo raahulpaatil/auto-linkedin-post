@@ -11,6 +11,11 @@ still ack with 200 rather than let Telegram retry, to avoid reprocessing a
 note that already partially succeeded (e.g. drafted but not yet delivered).
 That means a mid-pipeline failure is only visible in the Vercel function
 logs, not retried automatically. Acceptable for a solo, low-volume channel.
+
+Also: drafts get delivered back into this same channel, so the bot's own
+post is itself a channel_post update this webhook would otherwise receive.
+ingest_message() (src/ingest.py) guards against re-ingesting it as a new
+note — see its docstring for the known gap with multi-chunk drafts.
 """
 
 import json
@@ -31,13 +36,16 @@ from src.telegram_client import RealTelegramClient, extract_message  # noqa: E40
 def process_update(update: dict) -> str | None:
     """Runs one Telegram update through ingest -> screen -> (draft -> deliver
     if Develop). Returns the note_id processed, or None if this update wasn't
-    a text/voice message we ingest.
+    a text/voice message we ingest (including our own delivered drafts
+    looping back through the channel).
     """
     message = extract_message(update)
     if message is None:
         return None
 
     note = ingest_message(message)
+    if note is None:
+        return None
 
     result = screen_note(note["raw_text"])
     status = DECISION_TO_STATUS[result["decision"]]

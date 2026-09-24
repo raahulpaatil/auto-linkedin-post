@@ -8,9 +8,15 @@ LinkedIn directly.
 
 from src import tracker
 
+# Delivered messages are posted back into the same channel Meera posts notes
+# in, so the bot's own post also arrives as a channel_post update. This
+# prefix lets the webhook recognise and skip its own delivered messages
+# instead of re-ingesting them as new notes (see api/telegram_webhook.py).
+DELIVERY_MESSAGE_PREFIX = "Draft ready:"
+
 
 def _format_message(note_id: str, entry: dict) -> str:
-    lines = [f"Draft ready: {note_id}", f"Screening note: {entry['reason']}"]
+    lines = [f"{DELIVERY_MESSAGE_PREFIX} {note_id}", f"Screening note: {entry['reason']}"]
     if entry.get("confidential_flag"):
         lines.append(f"FLAGGED FOR REVIEW: {entry['confidential_reason']}")
     lines.append("")

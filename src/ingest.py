@@ -4,6 +4,7 @@ tracker with status "New".
 """
 
 from src import storage, tracker
+from src.deliver import DELIVERY_MESSAGE_PREFIX
 from src.transcribe import transcribe_voice
 
 
@@ -22,11 +23,19 @@ def load_raw_note(note_id: str) -> dict:
     return raw
 
 
-def ingest_message(message: dict) -> dict:
+def ingest_message(message: dict) -> dict | None:
     """Turns one incoming Telegram-shaped message into a stored raw note and a
     new tracker entry. Idempotent: re-ingesting the same message_id is a no-op
     on the tracker side (add_note) and just rewrites the same raw note file.
+
+    Returns None if this message is the pipeline's own delivered draft
+    looping back — drafts get posted into the same channel notes come from,
+    so both live delivery paths (webhook and local polling) would otherwise
+    re-ingest their own output as a new note.
     """
+    if message["type"] == "text" and message["text"].startswith(DELIVERY_MESSAGE_PREFIX):
+        return None
+
     note_id = f"note_{message['message_id']}"
     source_id = f"telegram:{message['message_id']}"
 
@@ -60,4 +69,5 @@ def ingest_message(message: dict) -> dict:
 def run_ingestion(client) -> list[dict]:
     """Pulls all pending updates from the given Telegram client and ingests each."""
     updates = client.get_updates()
-    return [ingest_message(message) for message in updates]
+    notes = [ingest_message(message) for message in updates]
+    return [note for note in notes if note is not None]
