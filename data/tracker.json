@@ -1,8 +1,8 @@
 {
   "notes": {
     "note_9999": {
-      "status": "New",
-      "reason": null,
+      "status": "Discarded",
+      "reason": "Internal technical diagnostic note with no skincare or brand content angle.",
       "confidential_flag": false,
       "confidential_reason": null,
       "source_id": "telegram:9999",
@@ -10,7 +10,7 @@
       "draft": null,
       "delivered": false,
       "created_at": "2026-09-24T05:16:24+00:00",
-      "updated_at": "2026-09-24T05:16:24+00:00"
+      "updated_at": "2026-09-24T05:17:50.772293+00:00"
     }
   }
 }
