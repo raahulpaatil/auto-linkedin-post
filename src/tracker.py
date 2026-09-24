@@ -1,15 +1,16 @@
 """Reads and writes data/tracker.json — the status table for every ingested note.
 
-Storage is a single JSON file committed to the repo (not a database), per the
-project's decision to use git as lightweight storage for a solo-user pipeline.
+Storage is a single JSON file, not a database, per the project's decision to
+use git as lightweight storage for a solo-user pipeline. Goes through
+src/storage.py, which reads/writes it locally for local dev or via the
+GitHub API for the deployed webhook (see storage.py for why).
 """
 
-import json
-import os
 from datetime import datetime, timezone
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TRACKER_PATH = os.path.join(BASE_DIR, "data", "tracker.json")
+from src import storage
+
+TRACKER_PATH = "data/tracker.json"
 
 VALID_STATUSES = {"New", "Developing", "Parked", "Discarded", "Draft ready"}
 
@@ -19,17 +20,11 @@ def _now() -> str:
 
 
 def load_tracker() -> dict:
-    if not os.path.exists(TRACKER_PATH):
-        return {"notes": {}}
-    with open(TRACKER_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return storage.read_json(TRACKER_PATH, default={"notes": {}})
 
 
-def save_tracker(tracker: dict) -> None:
-    os.makedirs(os.path.dirname(TRACKER_PATH), exist_ok=True)
-    with open(TRACKER_PATH, "w", encoding="utf-8") as f:
-        json.dump(tracker, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+def save_tracker(tracker: dict, message: str = "Update tracker") -> None:
+    storage.write_json(TRACKER_PATH, tracker, message=message)
 
 
 def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> dict:
@@ -49,7 +44,7 @@ def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> di
         "updated_at": timestamp,
     }
     tracker["notes"][note_id] = entry
-    save_tracker(tracker)
+    save_tracker(tracker, message=f"Track {note_id} (New)")
     return entry
 
 
@@ -64,7 +59,7 @@ def set_status(note_id: str, status: str, reason: str | None = None) -> dict:
     if reason is not None:
         entry["reason"] = reason
     entry["updated_at"] = _now()
-    save_tracker(tracker)
+    save_tracker(tracker, message=f"{note_id}: status -> {status}")
     return entry
 
 
@@ -76,7 +71,7 @@ def set_confidential_flag(note_id: str, flagged: bool, reason: str | None = None
     entry["confidential_flag"] = flagged
     entry["confidential_reason"] = reason
     entry["updated_at"] = _now()
-    save_tracker(tracker)
+    save_tracker(tracker, message=f"{note_id}: confidential_flag -> {flagged}")
     return entry
 
 
@@ -88,7 +83,7 @@ def set_draft(note_id: str, draft_text: str) -> dict:
     entry["draft"] = draft_text
     entry["status"] = "Draft ready"
     entry["updated_at"] = _now()
-    save_tracker(tracker)
+    save_tracker(tracker, message=f"{note_id}: draft ready")
     return entry
 
 
@@ -99,7 +94,7 @@ def set_delivered(note_id: str) -> dict:
     entry = tracker["notes"][note_id]
     entry["delivered"] = True
     entry["updated_at"] = _now()
-    save_tracker(tracker)
+    save_tracker(tracker, message=f"{note_id}: delivered")
     return entry
 
 

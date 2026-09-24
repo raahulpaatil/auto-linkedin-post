@@ -3,30 +3,23 @@ text, store the raw note with a timestamp and source id, and register it in the
 tracker with status "New".
 """
 
-import json
-import os
-
-from src import tracker
+from src import storage, tracker
 from src.transcribe import transcribe_voice
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-NOTES_DIR = os.path.join(BASE_DIR, "data", "notes")
 
 
 def _note_path(note_id: str) -> str:
-    return os.path.join(NOTES_DIR, f"{note_id}.json")
+    return f"data/notes/{note_id}.json"
 
 
 def save_raw_note(note: dict) -> None:
-    os.makedirs(NOTES_DIR, exist_ok=True)
-    with open(_note_path(note["id"]), "w", encoding="utf-8") as f:
-        json.dump(note, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+    storage.write_json(_note_path(note["id"]), note, message=f"Ingest {note['id']}")
 
 
 def load_raw_note(note_id: str) -> dict:
-    with open(_note_path(note_id), "r", encoding="utf-8") as f:
-        return json.load(f)
+    raw = storage.read_json(_note_path(note_id), default=None)
+    if raw is None:
+        raise FileNotFoundError(f"No raw note stored for {note_id!r}")
+    return raw
 
 
 def ingest_message(message: dict) -> dict:

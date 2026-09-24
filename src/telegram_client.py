@@ -78,7 +78,9 @@ class RealTelegramClient:
         """Fetches Telegram updates since the last processed one and returns
         them normalised to the shape ingest.py expects (message_id/date/type
         plus text or voice_file_id). Advances and persists the offset so a
-        later call doesn't re-fetch what's already been ingested.
+        later call doesn't re-fetch what's already been ingested. Used by the
+        local polling loop (main.py); the deployed webhook uses
+        extract_message() directly on each pushed update instead.
         """
         offset = self._load_offset()
         raw_updates = self._call("getUpdates", offset=offset, timeout=10)
@@ -86,28 +88,9 @@ class RealTelegramClient:
         highest_update_id = offset - 1
         for update in raw_updates:
             highest_update_id = max(highest_update_id, update["update_id"])
-            msg = update.get("channel_post") or update.get("message")
-            if msg is None:
-                continue  # edits, reactions, other update types we don't ingest
-            if "voice" in msg:
-                messages.append(
-                    {
-                        "message_id": msg["message_id"],
-                        "date": _unix_to_iso(msg["date"]),
-                        "type": "voice",
-                        "voice_file_id": msg["voice"]["file_id"],
-                    }
-                )
-            elif "text" in msg:
-                messages.append(
-                    {
-                        "message_id": msg["message_id"],
-                        "date": _unix_to_iso(msg["date"]),
-                        "type": "text",
-                        "text": msg["text"],
-                    }
-                )
-            # other message types (photos, stickers, etc.) are ignored
+            message = extract_message(update)
+            if message is not None:
+                messages.append(message)
         if raw_updates:
             self._save_offset(highest_update_id + 1)
         return messages
@@ -126,6 +109,32 @@ class RealTelegramClient:
 
 def _unix_to_iso(unix_ts: int) -> str:
     return datetime.fromtimestamp(unix_ts, tz=timezone.utc).isoformat()
+
+
+def extract_message(update: dict) -> dict | None:
+    """Normalises one raw Telegram update (from getUpdates or a webhook push)
+    into the shape ingest.py expects: message_id/date/type plus text or
+    voice_file_id. Returns None for update types we don't ingest (edits,
+    reactions, non-text/voice messages).
+    """
+    msg = update.get("channel_post") or update.get("message")
+    if msg is None:
+        return None
+    if "voice" in msg:
+        return {
+            "message_id": msg["message_id"],
+            "date": _unix_to_iso(msg["date"]),
+            "type": "voice",
+            "voice_file_id": msg["voice"]["file_id"],
+        }
+    if "text" in msg:
+        return {
+            "message_id": msg["message_id"],
+            "date": _unix_to_iso(msg["date"]),
+            "type": "text",
+            "text": msg["text"],
+        }
+    return None
 
 
 def _split_message(text: str, limit: int = MAX_MESSAGE_LENGTH) -> list[str]:
