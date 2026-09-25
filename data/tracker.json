@@ -1,3 +1,16 @@
 {
-  "notes": {}
+  "notes": {
+    "note_6": {
+      "status": "New",
+      "reason": null,
+      "confidential_flag": false,
+      "confidential_reason": null,
+      "source_id": "telegram:6",
+      "note_type": "text",
+      "draft": null,
+      "delivered": false,
+      "created_at": "2026-09-25T04:42:49+00:00",
+      "updated_at": "2026-09-25T04:42:49+00:00"
+    }
+  }
 }
