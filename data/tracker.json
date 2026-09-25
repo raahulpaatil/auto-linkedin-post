@@ -57,10 +57,10 @@
       "source_id": "telegram:12",
       "note_type": "text",
       "draft": null,
-      "screening_delivered": false,
+      "screening_delivered": true,
       "delivered": false,
       "created_at": "2026-09-25T17:54:16+00:00",
-      "updated_at": "2026-09-25T17:54:25.900151+00:00"
+      "updated_at": "2026-09-25T17:54:27.512665+00:00"
     }
   }
 }
