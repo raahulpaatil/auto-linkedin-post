@@ -1,0 +1,7 @@
+{
+  "id": "note_12",
+  "source_id": "telegram:12",
+  "timestamp": "2026-09-25T17:54:16+00:00",
+  "type": "text",
+  "raw_text": "Okay so batch fourteen came back from the manufacturer and the pH stability\ndata looked off. I went back to the supplier and it turns out they quietly changed\nthe preservative blend without notifying us — they sent a revised spec sheet\nthree months ago but it got buried. The new preservative system is more acidic\nthan the previous one. The finished product pH dropped by about 0.4 units\nwhich sounds small but it's enough to push us out of the optimal range for our\nemollient blend. The batch isn't unsafe but the texture is different in a way that I\nthink customers will notice. We're holding it. I need to write about this because I\nthink it illustrates something important — the assumption that a 'same formula'\nreorder is actually the same formula. It often isn't. Suppliers change things. If\nyou're not checking the CoA against a baseline every batch, you won't catch it\nuntil the customer does."
+}
