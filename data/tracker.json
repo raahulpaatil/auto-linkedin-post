@@ -13,11 +13,20 @@
       "updated_at": "2026-09-25T04:43:08.475481+00:00"
     },
     "note_9": {
-      "status": "New",
-      "reason": null,
-      "bucket_explanation": null,
-      "metrics": {},
-      "search_query": null,
+      "status": "Developing",
+      "reason": "Strong consumer education angle with a concrete formulation mechanism ready to draft immediately.",
+      "bucket_explanation": "topic_fit scored 5/5 as an ideal Consumer Education and Formulation Science piece addressing a common skincare mistake. Additionally, technical_depth scored 4/5 because the mechanism of humectants drawing moisture from the dermis in dry environments provides immediate substance for a structured post.",
+      "metrics": {
+        "specificity": 4,
+        "topic_fit": 5,
+        "technical_depth": 4,
+        "voice_compatibility": 5,
+        "citability": 4,
+        "completeness": 4,
+        "novelty": 3,
+        "confidentiality_risk": 1
+      },
+      "search_query": "hyaluronic acid low humidity transepidermal water loss",
       "confidential_flag": false,
       "confidential_reason": null,
       "source_id": "telegram:9",
@@ -26,7 +35,7 @@
       "screening_delivered": false,
       "delivered": false,
       "created_at": "2026-09-25T09:46:56+00:00",
-      "updated_at": "2026-09-25T09:46:56+00:00"
+      "updated_at": "2026-09-25T09:47:04.098488+00:00"
     }
   }
 }
