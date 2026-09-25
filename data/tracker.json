@@ -38,20 +38,29 @@
       "updated_at": "2026-09-25T09:47:21.887302+00:00"
     },
     "note_12": {
-      "status": "New",
-      "reason": null,
-      "bucket_explanation": null,
-      "metrics": {},
-      "search_query": null,
-      "confidential_flag": false,
-      "confidential_reason": null,
+      "status": "Developing",
+      "reason": "Compelling industry transparency narrative detailing supply chain quality control and Certificate of Analysis verification.",
+      "bucket_explanation": "topic_fit scored 5/5 as a quintessential Industry Transparency and Formulation Science story, while specificity scored 5/5 thanks to concrete data like the 0.4 pH drop. Although confidentiality_risk scored 4/5 because internal batch QC issues are detailed, completeness scored 5/5, providing a fully formed structure ready to Develop once internal identifiers are generalized.",
+      "metrics": {
+        "specificity": 5,
+        "topic_fit": 5,
+        "technical_depth": 4,
+        "voice_compatibility": 5,
+        "citability": 3,
+        "completeness": 5,
+        "novelty": 5,
+        "confidentiality_risk": 4
+      },
+      "search_query": "cosmetic manufacturing supplier changes certificate of analysis",
+      "confidential_flag": true,
+      "confidential_reason": "internal batch number and formulation QC hold details",
       "source_id": "telegram:12",
       "note_type": "text",
       "draft": null,
       "screening_delivered": false,
       "delivered": false,
       "created_at": "2026-09-25T17:54:16+00:00",
-      "updated_at": "2026-09-25T17:54:16+00:00"
+      "updated_at": "2026-09-25T17:54:25.900151+00:00"
     }
   }
 }
