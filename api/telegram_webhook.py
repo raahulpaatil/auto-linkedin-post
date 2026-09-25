@@ -12,10 +12,11 @@ note that already partially succeeded (e.g. drafted but not yet delivered).
 That means a mid-pipeline failure is only visible in the Vercel function
 logs, not retried automatically. Acceptable for a solo, low-volume channel.
 
-Also: drafts get delivered back into this same channel, so the bot's own
-post is itself a channel_post update this webhook would otherwise receive.
-ingest_message() (src/ingest.py) guards against re-ingesting it as a new
-note — see its docstring for the known gap with multi-chunk drafts.
+Also: both the screening-result message and the draft get delivered back
+into this same channel, so the bot's own posts are themselves channel_post
+updates this webhook would otherwise receive. ingest_message() (src/ingest.py)
+guards against re-ingesting either as a new note — see its docstring for the
+known gap with multi-chunk drafts.
 """
 
 import json
@@ -25,8 +26,8 @@ from http.server import BaseHTTPRequestHandler
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src import tracker  # noqa: E402
-from src.deliver import deliver_draft  # noqa: E402
+from src import rss, tracker  # noqa: E402
+from src.deliver import deliver_draft, deliver_screening_result  # noqa: E402
 from src.draft import draft_post  # noqa: E402
 from src.ingest import ingest_message  # noqa: E402
 from src.screen import DECISION_TO_STATUS, screen_note  # noqa: E402
@@ -34,10 +35,11 @@ from src.telegram_client import RealTelegramClient, extract_message  # noqa: E40
 
 
 def process_update(update: dict) -> str | None:
-    """Runs one Telegram update through ingest -> screen -> (draft -> deliver
-    if Develop). Returns the note_id processed, or None if this update wasn't
-    a text/voice message we ingest (including our own delivered drafts
-    looping back through the channel).
+    """Runs one Telegram update through ingest -> screen -> deliver screening
+    result -> (RSS search -> draft -> deliver draft, if Develop). Returns the
+    note_id processed, or None if this update wasn't a text/voice message we
+    ingest (including our own delivered messages looping back through the
+    channel).
     """
     message = extract_message(update)
     if message is None:
@@ -49,21 +51,28 @@ def process_update(update: dict) -> str | None:
 
     result = screen_note(note["raw_text"])
     status = DECISION_TO_STATUS[result["decision"]]
-    tracker.set_status(note["id"], status, reason=result["reason"])
-    tracker.set_confidential_flag(
+    tracker.set_screening_result(
         note["id"],
-        flagged=result.get("confidential_flag", False),
-        reason=result.get("confidential_reason"),
+        status=status,
+        reason=result["reason"],
+        bucket_explanation=result["bucket_explanation"],
+        metrics=result["metrics"],
+        confidential_flag=result.get("confidential_flag", False),
+        confidential_reason=result.get("confidential_reason"),
+        search_query=result.get("search_query"),
     )
+
+    client = RealTelegramClient()
+    chat_id = os.environ["TELEGRAM_CHAT_ID"]
+    deliver_screening_result(client, chat_id, note["id"])
 
     if result["decision"] != "Develop":
         return note["id"]
 
-    draft = draft_post(note["raw_text"])
+    search_query = result.get("search_query")
+    rss_results = rss.search_google_news(search_query) if search_query else []
+    draft = draft_post(note["raw_text"], rss_results=rss_results)
     tracker.set_draft(note["id"], draft)
-
-    client = RealTelegramClient()
-    chat_id = os.environ["TELEGRAM_CHAT_ID"]
     deliver_draft(client, chat_id, note["id"])
     return note["id"]
 

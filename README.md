@@ -29,15 +29,46 @@ Two ways to run it:
 | Stage    | File               | Status                          |
 |----------|--------------------|----------------------------------|
 | Ingest   | `src/ingest.py`    | Working — mock, local-poll, or webhook |
-| Screen   | `src/screen.py`    | Working, live Gemini calls       |
-| Draft    | `src/draft.py`     | Working, live Gemini calls       |
-| Deliver  | `src/deliver.py`   | Working — mock or live Telegram  |
+| Screen   | `src/screen.py`    | Working, live Gemini calls, 8-metric scoring |
+| Draft    | `src/draft.py`     | Working, live Gemini calls, Google News RSS lookup |
+| Deliver  | `src/deliver.py`   | Working — mock or live Telegram, notifies on every note |
 
 `data/tracker.json` holds the status of every note (`New` / `Developing` /
-`Parked` / `Discarded` / `Draft ready`), plus its confidentiality flag,
-delivery flag, and, once drafted, its draft text. `data/notes/` holds one
-JSON file per raw note. Both are read/written through `src/storage.py`,
-which supports two backends (see below) — not a database.
+`Parked` / `Discarded` / `Draft ready`), its 8 screening metrics and bucket
+explanation, its confidentiality flag, delivery flags, and, once drafted, its
+draft text. `data/notes/` holds one JSON file per raw note. Both are read/
+written through `src/storage.py`, which supports two backends (see below) —
+not a database.
+
+## Screening: 8 metrics + explicit bucket reasoning
+
+Every note is scored 1-5 on 8 metrics before being classified:
+`specificity`, `topic_fit`, `technical_depth`, `voice_compatibility`,
+`citability`, `completeness`, `novelty`, `confidentiality_risk` (see
+`src/screen.py` for exact definitions — each is grounded in something from
+`meera_voice_skill.md`, not arbitrary). The model then classifies the note
+as Develop/Park/Discard and writes `bucket_explanation`, a short paragraph
+that must reference at least two of the metric scores by name to justify the
+decision — not just restate it.
+
+**Every screened note gets a Telegram reply** — decision, all 8 metrics, and
+the bucket explanation — regardless of which bucket it lands in. Develop
+notes get this plus, once drafted, the full draft as a second message.
+
+## Drafting: Google News RSS lookup
+
+Before drafting a "Develop" note, the pipeline searches Google News RSS
+(`src/rss.py`, no API key needed) using a search query the screening step
+generated for that note's topic. This extends non-negotiable rule 2 — "use a
+real source if one exists" — to sources actively searched for, not just ones
+already in the note. The search is best-effort: a network failure or zero
+results never blocks drafting. The model is instructed to cite a result only
+if it's a genuine, direct fit for the specific claim being made (real outlet
+name, headline, date, exactly as given); if nothing found is an honest fit,
+it falls back to the existing rule (use the note's own source, or the
+`[CURRENT HOOK]` placeholder, or state plainly that there's no study). In
+testing, most Google News results are lifestyle press, not academic-style
+citations — the model correctly declines to force-fit those in.
 
 ## Storage backends
 

@@ -1,27 +1,61 @@
-"""Deliver stage: send a ready draft back to Meera via the Telegram bot, and
-mark it delivered in the tracker so a later run doesn't resend it.
+"""Deliver stage: send Meera a Telegram message for every screened note
+(decision, 8 metrics, bucket reasoning) and, for "Develop" notes once
+drafted, the full draft — then mark each as delivered so a later run doesn't
+resend it.
 
-Non-negotiable rule 1: this stage only ever sends the draft back to Meera for
-her own review and manual posting. It must never call anything that posts to
+Non-negotiable rule 1: drafts only ever go back to Meera for her own review
+and manual posting. This stage must never call anything that posts to
 LinkedIn directly.
 """
 
 from src import tracker
-
-# Delivered messages are posted back into the same channel Meera posts notes
-# in, so the bot's own post also arrives as a channel_post update. This
-# prefix lets the webhook recognise and skip its own delivered messages
-# instead of re-ingesting them as new notes (see api/telegram_webhook.py).
-DELIVERY_MESSAGE_PREFIX = "Draft ready:"
+from src.constants import DELIVERY_MESSAGE_PREFIX, METRIC_KEYS, SCREENING_MESSAGE_PREFIX
 
 
-def _format_message(note_id: str, entry: dict) -> str:
-    lines = [f"{DELIVERY_MESSAGE_PREFIX} {note_id}", f"Screening note: {entry['reason']}"]
-    if entry.get("confidential_flag"):
-        lines.append(f"FLAGGED FOR REVIEW: {entry['confidential_reason']}")
+def _format_screening_message(note_id: str, entry: dict) -> str:
+    lines = [
+        f"{SCREENING_MESSAGE_PREFIX} {note_id}",
+        f"Decision: {entry['status']}",
+        entry["reason"],
+        "",
+        "Metrics (1-5):",
+    ]
+    metrics = entry.get("metrics") or {}
+    for key in METRIC_KEYS:
+        if key in metrics:
+            lines.append(f"  {key}: {metrics[key]}")
     lines.append("")
-    lines.append(entry["draft"])
+    lines.append(entry["bucket_explanation"])
+    if entry.get("confidential_flag"):
+        lines.append("")
+        lines.append(f"FLAGGED FOR REVIEW: {entry['confidential_reason']}")
     return "\n".join(lines)
+
+
+def _format_draft_message(note_id: str, entry: dict) -> str:
+    return f"{DELIVERY_MESSAGE_PREFIX} {note_id}\n\n{entry['draft']}"
+
+
+def deliver_screening_result(client, chat_id: str, note_id: str) -> None:
+    entry = tracker.get_note(note_id)
+    if entry is None:
+        raise KeyError(f"No tracker entry for note {note_id!r}")
+    client.send_message(chat_id, _format_screening_message(note_id, entry))
+    tracker.set_screening_delivered(note_id)
+
+
+def run_screening_delivery(client, chat_id: str) -> list[str]:
+    """Delivers the screening result (decision, metrics, bucket reasoning)
+    for every note that's been screened but not yet had that result sent —
+    regardless of which bucket it landed in.
+    """
+    delivered = []
+    for note_id, entry in tracker.list_notes().items():
+        if entry["status"] == "New" or entry.get("screening_delivered"):
+            continue
+        deliver_screening_result(client, chat_id, note_id)
+        delivered.append(note_id)
+    return delivered
 
 
 def deliver_draft(client, chat_id: str, note_id: str) -> None:
@@ -30,7 +64,7 @@ def deliver_draft(client, chat_id: str, note_id: str) -> None:
         raise KeyError(f"No tracker entry for note {note_id!r}")
     if entry["status"] != "Draft ready":
         raise ValueError(f"Note {note_id!r} is not Draft ready (status={entry['status']!r})")
-    client.send_message(chat_id, _format_message(note_id, entry))
+    client.send_message(chat_id, _format_draft_message(note_id, entry))
     tracker.set_delivered(note_id)
 
 

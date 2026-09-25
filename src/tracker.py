@@ -34,11 +34,15 @@ def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> di
     entry = {
         "status": "New",
         "reason": None,
+        "bucket_explanation": None,
+        "metrics": {},
+        "search_query": None,
         "confidential_flag": False,
         "confidential_reason": None,
         "source_id": source_id,
         "note_type": note_type,
         "draft": None,
+        "screening_delivered": False,
         "delivered": False,
         "created_at": timestamp,
         "updated_at": timestamp,
@@ -48,7 +52,20 @@ def add_note(note_id: str, timestamp: str, source_id: str, note_type: str) -> di
     return entry
 
 
-def set_status(note_id: str, status: str, reason: str | None = None) -> dict:
+def set_screening_result(
+    note_id: str,
+    status: str,
+    reason: str,
+    bucket_explanation: str,
+    metrics: dict,
+    confidential_flag: bool,
+    confidential_reason: str | None = None,
+    search_query: str | None = None,
+) -> dict:
+    """Writes the full screening outcome (status, reason, metrics, bucket
+    explanation, confidentiality flag, search query) in a single save — one
+    GitHub commit on the github storage backend.
+    """
     if status not in VALID_STATUSES:
         raise ValueError(f"Invalid status {status!r}, must be one of {VALID_STATUSES}")
     tracker = load_tracker()
@@ -56,22 +73,25 @@ def set_status(note_id: str, status: str, reason: str | None = None) -> dict:
         raise KeyError(f"No tracker entry for note {note_id!r}")
     entry = tracker["notes"][note_id]
     entry["status"] = status
-    if reason is not None:
-        entry["reason"] = reason
+    entry["reason"] = reason
+    entry["bucket_explanation"] = bucket_explanation
+    entry["metrics"] = metrics
+    entry["search_query"] = search_query
+    entry["confidential_flag"] = confidential_flag
+    entry["confidential_reason"] = confidential_reason
     entry["updated_at"] = _now()
-    save_tracker(tracker, message=f"{note_id}: status -> {status}")
+    save_tracker(tracker, message=f"{note_id}: screened -> {status}")
     return entry
 
 
-def set_confidential_flag(note_id: str, flagged: bool, reason: str | None = None) -> dict:
+def set_screening_delivered(note_id: str) -> dict:
     tracker = load_tracker()
     if note_id not in tracker["notes"]:
         raise KeyError(f"No tracker entry for note {note_id!r}")
     entry = tracker["notes"][note_id]
-    entry["confidential_flag"] = flagged
-    entry["confidential_reason"] = reason
+    entry["screening_delivered"] = True
     entry["updated_at"] = _now()
-    save_tracker(tracker, message=f"{note_id}: confidential_flag -> {flagged}")
+    save_tracker(tracker, message=f"{note_id}: screening result delivered")
     return entry
 
 

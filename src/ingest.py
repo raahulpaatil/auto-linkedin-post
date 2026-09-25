@@ -4,7 +4,7 @@ tracker with status "New".
 """
 
 from src import storage, tracker
-from src.deliver import DELIVERY_MESSAGE_PREFIX
+from src.constants import BOT_MESSAGE_PREFIXES
 from src.transcribe import transcribe_voice
 
 
@@ -28,12 +28,13 @@ def ingest_message(message: dict) -> dict | None:
     new tracker entry. Idempotent: re-ingesting the same message_id is a no-op
     on the tracker side (add_note) and just rewrites the same raw note file.
 
-    Returns None if this message is the pipeline's own delivered draft
-    looping back — drafts get posted into the same channel notes come from,
-    so both live delivery paths (webhook and local polling) would otherwise
-    re-ingest their own output as a new note.
+    Returns None if this message is one of the pipeline's own delivered
+    messages (a screening result or a draft) looping back — those get posted
+    into the same channel notes come from, so both live delivery paths
+    (webhook and local polling) would otherwise re-ingest their own output as
+    a new note.
     """
-    if message["type"] == "text" and message["text"].startswith(DELIVERY_MESSAGE_PREFIX):
+    if message["type"] == "text" and message["text"].startswith(BOT_MESSAGE_PREFIXES):
         return None
 
     note_id = f"note_{message['message_id']}"
