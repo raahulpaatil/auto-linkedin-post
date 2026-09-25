@@ -63,7 +63,7 @@
       "updated_at": "2026-09-25T17:54:40.705382+00:00"
     },
     "note_15": {
-      "status": "Developing",
+      "status": "Draft ready",
       "reason": "Clear consumer education angle diagnosing a common skincare layering mistake with a complete narrative arc.",
       "bucket_explanation": "topic_fit scored 5/5 as an ideal Consumer Education post that addresses customer misattribution of product efficacy. Completeness scored 4/5 because the note provides the full scenario, root cause mechanism, and takeaway message ready for drafting. Even with citability at 2/5, the foundational cosmetic science is clear and immediately actionable.",
       "metrics": {
@@ -81,11 +81,11 @@
       "confidential_reason": null,
       "source_id": "telegram:15",
       "note_type": "text",
-      "draft": null,
+      "draft": "A customer messaged us earlier today to say the serum she had been using for four months had suddenly stopped working. It was sitting on the surface of her skin instead of absorbing, and her face had become congested over the previous fortnight. She had not changed the serum, but two weeks earlier, she had introduced a new moisturiser - a heavier, silicone-based occlusive. She had been applying the moisturiser first.\n\nI want to explain why this happens, because when a product stops delivering results, people almost always blame the product whose texture they are feeling rather than the sequence they placed it in.\n\nI'm not saying the new moisturiser was poorly formulated. I'm saying the order of application made it physically impossible for the serum to function.\n\nHere is what happens at the barrier level. A targeted serum relies on a light, typically water-based vehicle to deliver bioavailable actives directly into the upper layers of the epidermis. An occlusive moisturiser does the opposite: it uses film-forming agents - high-viscosity silicones, petrolatum, or dense plant waxes - to create a hydrophobic barrier that reduces transepidermal water loss. When you lay down an occlusive film first, water-soluble actives cannot penetrate it. The serum pools on top of the barrier, fails to absorb, and eventually mixes with surface sebum and ambient grime. \n\nThe serum had not changed. The formulation had not degraded. The barrier was simply on the wrong side of the active.\n\nWe ran into this confusion early on at Skinstinct when formulating our own serums. We had internal debates about whether to add light emollient slip to the base so the product felt more substantive on initial application, but decided against it specifically because any premature occlusion compromises the absorption of subsequent steps.\n\nIf a serum you have relied on for months suddenly feels sticky, begins pilling, or causes congestion, check the base of whatever product you applied directly before it. If that product lists non-volatile silicones, waxes, or heavy plant oils in its top five INCI ingredients, move it to the final step of your routine before evaluating the serum again.",
       "screening_delivered": true,
       "delivered": false,
       "created_at": "2026-09-25T17:54:58+00:00",
-      "updated_at": "2026-09-25T17:55:07.740292+00:00"
+      "updated_at": "2026-09-25T17:55:17.140058+00:00"
     }
   }
 }
