@@ -38,7 +38,7 @@
       "updated_at": "2026-09-25T09:47:21.887302+00:00"
     },
     "note_12": {
-      "status": "Developing",
+      "status": "Draft ready",
       "reason": "Compelling industry transparency narrative detailing supply chain quality control and Certificate of Analysis verification.",
       "bucket_explanation": "topic_fit scored 5/5 as a quintessential Industry Transparency and Formulation Science story, while specificity scored 5/5 thanks to concrete data like the 0.4 pH drop. Although confidentiality_risk scored 4/5 because internal batch QC issues are detailed, completeness scored 5/5, providing a fully formed structure ready to Develop once internal identifiers are generalized.",
       "metrics": {
@@ -56,11 +56,11 @@
       "confidential_reason": "internal batch number and formulation QC hold details",
       "source_id": "telegram:12",
       "note_type": "text",
-      "draft": null,
+      "draft": "Batch 14 of our moisturiser arrived from the manufacturer with a pH reading that had dropped by 0.4 units against our formulation baseline.\n\nI want to write about this, because there is an industry-wide assumption that a reorder of an approved formulation will yield the exact same product every time. It frequently does not.\n\nA drop of 0.4 sounds negligible on paper. In an emulsion, it is not. That shift was enough to push the internal phase out of the optimal pH range required for our emollient blend to suspend correctly. The product was not unsafe, and the microbial limits were clear, but the viscosity had thinned and the skin-feel was genuinely different. \n\nThe cause was a change in the preservative system. Our raw material supplier had quietly substituted one of the organic acids in the blend with a more acidic variant. \n\nThe batch met standard release criteria. The supplier considered the raw material equivalent. The product in the jar was not what we designed.\n\nI am not saying suppliers alter components out of malice. I am saying that supply chains fluctuate, component blends are periodically adjusted at the chemical manufacturer level, and those changes rarely arrive with an urgent warning. In our case, the supplier had sent a revised specification sheet three months earlier. We missed it. It sat buried in an administrative email thread, which means the oversight was ours before it was anyone else's.\n\nWe made the decision to hold all of batch 14 rather than bottle it. It was an expensive hold, but releasing a compromised texture because the paperwork technically cleared safety testing is precisely how product standards quietly erode.\n\nIf you are manufacturing personal care products, the baseline practice worth auditing is not whether your contract filler provides a Certificate of Analysis (CoA) for each run, but whether your team actively compares every incoming raw material CoA against your original bench specification before compounding begins.",
       "screening_delivered": true,
       "delivered": false,
       "created_at": "2026-09-25T17:54:16+00:00",
-      "updated_at": "2026-09-25T17:54:27.512665+00:00"
+      "updated_at": "2026-09-25T17:54:39.182569+00:00"
     }
   }
 }
