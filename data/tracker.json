@@ -63,11 +63,20 @@
       "updated_at": "2026-09-25T17:54:40.705382+00:00"
     },
     "note_15": {
-      "status": "New",
-      "reason": null,
-      "bucket_explanation": null,
-      "metrics": {},
-      "search_query": null,
+      "status": "Developing",
+      "reason": "Clear consumer education angle diagnosing a common skincare layering mistake with a complete narrative arc.",
+      "bucket_explanation": "topic_fit scored 5/5 as an ideal Consumer Education post that addresses customer misattribution of product efficacy. Completeness scored 4/5 because the note provides the full scenario, root cause mechanism, and takeaway message ready for drafting. Even with citability at 2/5, the foundational cosmetic science is clear and immediately actionable.",
+      "metrics": {
+        "specificity": 4,
+        "topic_fit": 5,
+        "technical_depth": 3,
+        "voice_compatibility": 5,
+        "citability": 2,
+        "completeness": 4,
+        "novelty": 3,
+        "confidentiality_risk": 1
+      },
+      "search_query": "skincare layering order occlusives penetration barrier absorption",
       "confidential_flag": false,
       "confidential_reason": null,
       "source_id": "telegram:15",
@@ -76,7 +85,7 @@
       "screening_delivered": false,
       "delivered": false,
       "created_at": "2026-09-25T17:54:58+00:00",
-      "updated_at": "2026-09-25T17:54:58+00:00"
+      "updated_at": "2026-09-25T17:55:05.758002+00:00"
     }
   }
 }
